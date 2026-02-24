@@ -32,6 +32,8 @@ function parseDate(text: string): string | null {
   return `${match[1]}-${match[2]}-${match[3]}`
 }
 
+let _debugImageUrlLogged = false
+
 function parsePage(html: string): BugsAlbum[] {
   const $ = cheerio.load(html)
   const albums: BugsAlbum[] = []
@@ -60,9 +62,18 @@ function parsePage(html: string): BugsAlbum[] {
     const releaseDate = parseDate(text)
     if (!releaseDate) return
 
-    // Cover: https://image.bugsm.co.kr/album/images/170/{id}/{id}.jpg
-    const cover_image_url = `https://image.bugsm.co.kr/album/images/170/${albumId}/${albumId}.jpg`
+    const imgEl = $li.find('img').first()
+    const cover_image_url =
+      imgEl.attr('data-original') ||
+      imgEl.attr('data-src') ||
+      imgEl.attr('src') ||
+      ''
     const source_url = `https://music.bugs.co.kr/album/${albumId}`
+
+    if (!_debugImageUrlLogged && cover_image_url) {
+      console.log('[DEBUG] Sample image URL:', cover_image_url)
+      _debugImageUrlLogged = true
+    }
 
     albums.push({
       title,

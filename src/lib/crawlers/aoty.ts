@@ -51,6 +51,15 @@ function parseAotyDate(text: string, defaultYear: number): string | null {
   return null
 }
 
+function containsHangul(text: string): boolean {
+  return /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(text)
+}
+
+const KOREAN_ARTIST_DENYLIST = new Set([
+  'ive', 'aespa', 'newjeans', 'stray kids', 'txt', 'bts',
+  'seventeen', 'nct', 'le sserafim', 'illit', 'kiss of life',
+])
+
 function parseReleasedPage(html: string, status: 'released'): AotyAlbum[] {
   const $ = cheerio.load(html)
   const albums: AotyAlbum[] = []
@@ -67,6 +76,8 @@ function parseReleasedPage(html: string, status: 'released'): AotyAlbum[] {
     if (!title) return
 
     const artist = $block.find('.artistTitle').first().text().trim() || 'Unknown'
+
+    if (containsHangul(artist) || containsHangul(title) || KOREAN_ARTIST_DENYLIST.has(artist.toLowerCase())) return
 
     const typeText = $block.find('.type').text().trim()
     const releaseDate = parseAotyDate(typeText, year)
@@ -122,6 +133,8 @@ function parseUpcomingPage(html: string): AotyAlbum[] {
     if (!title) return
 
     const artist = $block.find('.artistTitle').first().text().trim() || 'Unknown'
+
+    if (containsHangul(artist) || containsHangul(title) || KOREAN_ARTIST_DENYLIST.has(artist.toLowerCase())) return
 
     const typeText = $block.find('.type').text().trim()
     let releaseDate = parseAotyDate(typeText, year)

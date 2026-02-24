@@ -14,7 +14,7 @@ async function main() {
       new Map(
         albums.map((a) => {
           const slug = slugify('', a.artist)
-          return [slug, { name: a.artist, slug }]
+          return [slug, { name: a.artist, slug, origin_country: 'KR' }]
         })
       ).values()
     )
