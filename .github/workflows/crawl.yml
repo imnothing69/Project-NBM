@@ -1,0 +1,30 @@
+name: Crawl Domestic Albums
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # KST 10:00 (UTC 01:00)
+  workflow_dispatch:        # allows manual trigger from GitHub UI
+
+jobs:
+  crawl-domestic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run domestic crawler
+        run: npx tsx scripts/crawl-domestic.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
